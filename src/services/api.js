@@ -1,29 +1,51 @@
-import axios from 'axios';
+import axios from "axios";
 
-// Cấu hình địa chỉ IP/URL của Backend. 
+// Cấu hình địa chỉ IP/URL của Backend.
 // Sau này ông bạn Backend chạy cổng nào (ví dụ: localhost:5000) thì bạn đổi số ở đây.
-const BASE_URL = 'http://localhost:5000/api'; 
+const BASE_URL = "https://caliber-hacker-driller.ngrok-free.dev";
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000, // Quá 10 giây không phản hồi thì ngắt kết nối
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Hàm gửi 1 câu văn bản lẻ lên cho AI phân tích
 export const analyzeSingleText = async (textContent) => {
   try {
-    const response = await apiClient.post('/analyze-text', { text: textContent });
-    return response.data; 
+    const response = await apiClient.post("/emotion-predict", {
+      text: textContent,
+    });
+    const res2 = await apiClient.post("/aspect-predict", {
+      sentence: textContent,
+    });
+    console.log("Emotion response:", response.data);
+    console.log("Aspect response:", res2.data);
+    
+    return {
+      emotion: response.data,
+      aspect: res2.data,
+    };
     /* Backend trả về dự kiến dạng:
-      {
-        "text": "Sản phẩm rất tốt",
-        "sentiment": "Tích cực",
-        "confidence": 0.95,
-        "keywords": ["rất tốt"]
+    {
+      emotion: {
+        label: "Tiêu cực",
+        probs: {
+          "Tiêu cực": 0.7051,
+          "Trung tính": 0.2303,
+          "Tích cực": 0.0646
+        }
+      },
+      aspect: {
+        results: [
+          {aspect: 'chet_lieu', sentiment: 'negative', aspect_score: 0.6486, sentiment_confidence: 0.6959},
+          {aspect: 'chat_luong', sentiment: 'neutral', aspect_score: 0.8158, sentiment_confidence: 0.5101}
+        ],
+        sentiment: string,
+        total_aspects: number
       }
+    }
     */
   } catch (error) {
     console.error("Lỗi gọi API Phân tích:", error);

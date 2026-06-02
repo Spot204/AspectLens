@@ -15,33 +15,31 @@ export default function SingleInput() {
     setResult(null);
 
     try {
-      // 1. GỌI API ĐƯỜNG ỐNG SANG SERVER AI
-      // Lưu ý: Tùy thuộc ông bạn Backend gộp 2 log thành 1 endpoint hay tách riêng,
-      // Đoạn này đang cấu hình nhận dữ liệu theo đúng cấu trúc log thực tế của bạn.
-      const data = await analyzeSingleText(text); 
+      const data = await analyzeSingleText(text);
+      console.log("Kết quả nhận về từ API:", data);
       
       setResult({
-        text: data.sentence || text,
-        sentiment: data.label || 'Trung tính',
-        probs: data.probs || { "Tích cực": 0, "Trung tính": 0, "Tiêu cực": 0 },
-        aspects: data.results || [] // Mảng kết quả bóc tách khía cạnh chi tiết
+        text: text,
+        sentiment: data.emotion?.label || 'Trung tính',
+        probs: data.emotion?.probs || { "Tích cực": 0, "Trung tính": 0, "Tiêu cực": 0 },
+        aspects: data.aspect?.results || [],
       });
     } catch (err) {
-      console.warn("Đang chạy Mock Data dựa trên cấu trúc log thực tế của Backend...");
-      
-      // MẸO FRONTEND: Giả lập dữ liệu TRÙNG KHỚP 100% với log thực tế bạn gửi để test giao diện
+      console.warn("Đang chạy Mock Data...");
+      // Mock data dựa trên cấu trúc thực tế
       setTimeout(() => {
         setResult({
           text: text,
-          sentiment: "Tích cực",
-          probs: { "Tiêu cực": 0.1077, "Trung tính": 0.1833, "Tích cực": 0.709 },
+          sentiment: "Tiêu cực",
+          probs: { "Tiêu cực": 0.7051, "Trung tính": 0.2303, "Tích cực": 0.0646 },
           aspects: [
-            { aspect: "giao hàng", polarity: "Tích cực" },
-            { aspect: "đóng gói", polarity: "Trung tính" }
+            { aspect: 'chet_lieu', sentiment: 'negative', aspect_score: 0.6486, sentiment_confidence: 0.6959 },
+            { aspect: 'chat_luong', sentiment: 'neutral', aspect_score: 0.8158, sentiment_confidence: 0.5101 },
+            { aspect: 'gia_cong', sentiment: 'negative', aspect_score: 0.7906, sentiment_confidence: 0.9834 }
           ]
         });
         setLoading(false);
-      }, 600);
+      }, 500);
     } finally {
       setLoading(false);
     }
@@ -73,14 +71,21 @@ export default function SingleInput() {
 
   // Định dạng màu sắc cho từng khía cạnh nhỏ phát hiện được
   const getAspectStyle = (polarity) => {
-    if (polarity === 'Tích cực' || polarity === 'positive') return 'bg-green-100/70 text-green-800 border-green-200';
-    if (polarity === 'Tiêu cực' || polarity === 'negative') return 'bg-red-100/70 text-red-800 border-red-200';
+    if (polarity === 'positive') return 'bg-green-100 text-green-800 border-green-200';
+    if (polarity === 'negative') return 'bg-red-100 text-red-800 border-red-200';
     return 'bg-gray-100 text-gray-700 border-gray-200';
+  };
+
+  // Chuyển đổi sentiment từ Tiếng Anh sang Tiếng Việt
+  const translateSentiment = (sentiment) => {
+    if (sentiment === 'positive') return 'Tích cực';
+    if (sentiment === 'negative') return 'Tiêu cực';
+    if (sentiment === 'neutral') return 'Trung tính';
+    return sentiment;
   };
 
   const config = result ? getSentimentConfig(result.sentiment) : null;
   const probs = result?.probs || { "Tích cực": 0, "Trung tính": 0, "Tiêu cực": 0 };
-
   return (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col h-full justify-between">
       <div>
@@ -131,16 +136,36 @@ export default function SingleInput() {
 
             {/* Khía cạnh chi tiết (Aspects) */}
             {result.aspects && result.aspects.length > 0 && (
-              <div className="space-y-1.5">
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Khía cạnh bóc tách:</span>
-                <div className="flex flex-wrap gap-1.5">
+              <div className="space-y-2 border-t border-gray-200/40 pt-2">
+                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Chi tiết {result.aspects.length} khía cạnh bóc tách:</span>
+                <div className="space-y-1.5">
                   {result.aspects.map((aspectObj, i) => {
-                    const name = aspectObj.aspect || aspectObj.khia_canh || "Khía cạnh";
-                    const polarity = aspectObj.polarity || aspectObj.sentiment || "Trung tính";
+                    const name = (aspectObj.aspect || '').replace(/_/g, ' ');
+                    const sentiment = aspectObj.sentiment || 'neutral';
+                    const aspScore = aspectObj.aspect_score || 0;
+                    const sentConf = aspectObj.sentiment_confidence || 0;
+                    
                     return (
-                      <span key={i} className={`text-xs border px-2 py-0.5 rounded-md font-medium ${getAspectStyle(polarity)}`}>
-                        {name}: <span className="font-bold">{polarity}</span>
-                      </span>
+                      <div key={i} className={`text-xs border rounded-lg p-2 ${getAspectStyle(sentiment)}`}>
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="font-bold capitalize">{name}</span>
+                          <span className="text-[10px] font-semibold">{translateSentiment(sentiment)}</span>
+                        </div>
+                        <div className="space-y-0.5">
+                          <div className="flex justify-between text-[10px]">
+                            <span>Điểm: {(aspScore * 100).toFixed(1)}%</span>
+                            <div className="w-16 bg-gray-200 h-1 rounded-full overflow-hidden">
+                              <div className="bg-blue-500 h-full" style={{ width: `${Math.min(aspScore * 100, 100)}%` }} />
+                            </div>
+                          </div>
+                          <div className="flex justify-between text-[10px]">
+                            <span>Tự tin: {(sentConf * 100).toFixed(1)}%</span>
+                            <div className="w-16 bg-gray-200 h-1 rounded-full overflow-hidden">
+                              <div className="bg-purple-500 h-full" style={{ width: `${Math.min(sentConf * 100, 100)}%` }} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>

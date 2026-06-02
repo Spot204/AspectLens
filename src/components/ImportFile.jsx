@@ -45,17 +45,43 @@ export default function ImportFile({ setAnalyticsData, setIsLoading }) {
       const row = fileData[i];
       const textToAnalyze = row[selectedColumn] || '';
 
-      // Giả lập thuật toán AI chấm điểm (Khi kết nối backend thật, bạn sẽ gọi API hàng loạt ở đây)
+      // Giả lập thuật toán AI chấm điểm với cấu trúc mới
       const sentimentOptions = ['Tích cực', 'Tiêu cực', 'Trung tính'];
       const mockSentiment = textToAnalyze.includes('tệ') || textToAnalyze.includes('lỗi') 
         ? 'Tiêu cực' 
         : sentimentOptions[Math.floor(Math.random() * sentimentOptions.length)];
 
+      // Tạo mock aspects data theo cấu trúc thực tế
+      const mockAspects = [
+        {
+          aspect: 'chat_luong',
+          sentiment: Math.random() > 0.5 ? 'positive' : 'negative',
+          aspect_score: Math.random() * (1 - 0.5) + 0.5,
+          sentiment_confidence: Math.random() * (1 - 0.6) + 0.6
+        },
+        {
+          aspect: 'giao_hang',
+          sentiment: Math.random() > 0.5 ? 'positive' : 'negative',
+          aspect_score: Math.random() * (1 - 0.5) + 0.5,
+          sentiment_confidence: Math.random() * (1 - 0.6) + 0.6
+        },
+        {
+          aspect: 'dich_vu',
+          sentiment: Math.random() > 0.5 ? 'positive' : 'negative',
+          aspect_score: Math.random() * (1 - 0.5) + 0.5,
+          sentiment_confidence: Math.random() * (1 - 0.6) + 0.6
+        }
+      ];
+
       resultsBuffer.push({
         text: textToAnalyze,
         sentiment: mockSentiment,
-        confidence: (Math.random() * (1 - 0.6) + 0.6).toFixed(2), // Random độ tự tin từ 60% đến 100%
-        keywords: Object.keys(row).filter(k => k !== selectedColumn).map(k => row[k]).slice(0, 2) // Lấy các cột khác làm từ khóa mẫu
+        probs: {
+          "Tích cực": Math.random() * 0.5 + 0.2,
+          "Trung tính": Math.random() * 0.3,
+          "Tiêu cực": Math.random() * 0.4
+        },
+        aspects: mockAspects
       });
 
       // Cập nhật thanh tiến trình % thực tế

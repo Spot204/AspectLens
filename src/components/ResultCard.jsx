@@ -27,9 +27,17 @@ export default function ResultCard({ item }) {
 
   // Hàm đổi màu riêng cho từng khía cạnh nhỏ bên trong
   const getAspectBadgeStyle = (polarity) => {
-    if (polarity === 'Tích cực' || polarity === 'positive') return 'bg-green-50 text-green-700 border-green-200';
-    if (polarity === 'Tiêu cực' || polarity === 'negative') return 'bg-red-50 text-red-700 border-red-200';
+    if (polarity === 'positive') return 'bg-green-50 text-green-700 border-green-200';
+    if (polarity === 'negative') return 'bg-red-50 text-red-700 border-red-200';
     return 'bg-gray-50 text-gray-600 border-gray-200';
+  };
+
+  // Chuyển đổi sentiment từ Tiếng Anh sang Tiếng Việt
+  const translateSentiment = (sentiment) => {
+    if (sentiment === 'positive') return 'Tích cực';
+    if (sentiment === 'negative') return 'Tiêu cực';
+    if (sentiment === 'neutral') return 'Trung tính';
+    return sentiment;
   };
 
   const config = getSentimentConfig(item.sentiment);
@@ -55,18 +63,41 @@ export default function ResultCard({ item }) {
 
       {/* PHẦN 2: HIỂN THỊ CÁC KHÍA CẠNH ĐÃ BÓC TÁCH (ASPECTS) */}
       {item.aspects && item.aspects.length > 0 && (
-        <div className="space-y-2">
-          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Khía cạnh chi tiết phát hiện được:</h4>
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-2.5 border-t border-gray-100 pt-3">
+          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Phân tích chi tiết {item.aspects.length} khía cạnh:</h4>
+          <div className="space-y-2">
             {item.aspects.map((aspectObj, idx) => {
-              // Hỗ trợ đọc cả key tiếng Anh lẫn tiếng Việt tùy ông backend trả về
-              const aspectName = aspectObj.aspect || aspectObj.khia_canh || "Khía cạnh";
-              const aspectPolarity = aspectObj.polarity || aspectObj.sentiment || "Trung tính";
+              const aspectName = (aspectObj.aspect || '').replace(/_/g, ' ');
+              const sentiment = aspectObj.sentiment || 'neutral';
+              const aspScore = aspectObj.aspect_score || 0;
+              const sentConf = aspectObj.sentiment_confidence || 0;
               
               return (
-                <div key={idx} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium ${getAspectBadgeStyle(aspectPolarity)}`}>
-                  <span className="font-semibold">{aspectName}:</span>
-                  <span>{aspectPolarity}</span>
+                <div key={idx} className={`border rounded-lg p-3 space-y-2 ${getAspectBadgeStyle(sentiment)}`}>
+                  <div className="flex justify-between items-start">
+                    <span className="font-bold text-sm capitalize">{aspectName}</span>
+                    <span className="text-xs font-semibold">{translateSentiment(sentiment)}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <div className="flex justify-between text-gray-600 mb-1">
+                        <span>Điểm khía cạnh</span>
+                        <span className="font-bold">{(aspScore * 100).toFixed(1)}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-blue-500 h-full" style={{ width: `${Math.min(aspScore * 100, 100)}%` }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-gray-600 mb-1">
+                        <span>Độ tự tin</span>
+                        <span className="font-bold">{(sentConf * 100).toFixed(1)}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-purple-500 h-full" style={{ width: `${Math.min(sentConf * 100, 100)}%` }} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               );
             })}
