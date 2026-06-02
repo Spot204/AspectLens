@@ -1,7 +1,6 @@
 import axios from "axios";
 
 // Cấu hình địa chỉ IP/URL của Backend.
-// Sau này ông bạn Backend chạy cổng nào (ví dụ: localhost:5000) thì bạn đổi số ở đây.
 const BASE_URL = "https://caliber-hacker-driller.ngrok-free.dev";
 
 const apiClient = axios.create({
@@ -11,7 +10,9 @@ const apiClient = axios.create({
   },
 });
 
-// Hàm gửi 1 câu văn bản lẻ lên cho AI phân tích
+// =========================================================================
+// HÀM 1: Gửi 1 câu văn bản lẻ lên cho AI phân tích (GIỮ NGUYÊN CỦA BẠN)
+// =========================================================================
 export const analyzeSingleText = async (textContent) => {
   try {
     const response = await apiClient.post("/emotion-predict", {
@@ -27,28 +28,28 @@ export const analyzeSingleText = async (textContent) => {
       emotion: response.data,
       aspect: res2.data,
     };
-    /* Backend trả về dự kiến dạng:
-    {
-      emotion: {
-        label: "Tiêu cực",
-        probs: {
-          "Tiêu cực": 0.7051,
-          "Trung tính": 0.2303,
-          "Tích cực": 0.0646
-        }
-      },
-      aspect: {
-        results: [
-          {aspect: 'chet_lieu', sentiment: 'negative', aspect_score: 0.6486, sentiment_confidence: 0.6959},
-          {aspect: 'chat_luong', sentiment: 'neutral', aspect_score: 0.8158, sentiment_confidence: 0.5101}
-        ],
-        sentiment: string,
-        total_aspects: number
-      }
-    }
-    */
   } catch (error) {
-    console.error("Lỗi gọi API Phân tích:", error);
+    console.error("Lỗi gọi API Phân tích đơn lẻ:", error);
+    throw error;
+  }
+};
+
+// =========================================================================
+// HÀM 2: TRIỂN KHAI CÁCH 2 - Gửi mảng comment chữ sạch bóc từ Excel (JSON)
+// =========================================================================
+export const analyzeFileBatchJSON = async (arrayOfComments) => {
+  try {
+    // arrayOfComments truyền vào sẽ có dạng mảng chữ thuần túy: ["câu 1", "câu 2", "câu 3"...]
+    // MẸO: Bạn hãy check với ông bạn Backend xem ông ấy đặt tên đường link (endpoint) 
+    // nhận hàng loạt là gì nhé, ở đây tôi tạm để tên mẫu là "/batch-predict"
+    const response = await apiClient.post("/batch-predict", {
+      comments: arrayOfComments, // Đóng gói mảng chữ vào key "comments" gửi đi
+    });
+
+    console.log("Kết quả phân tích hàng loạt từ API:", response.data);
+    return response.data; // Trả về danh sách mảng kết quả đã được AI dán nhãn
+  } catch (error) {
+    console.error("Lỗi gọi API Phân tích hàng loạt (Cách 2):", error);
     throw error;
   }
 };
