@@ -25,6 +25,7 @@ const isInvalidText = (text) => {
 
 export default function ImportFile({ setAnalyticsData, setIsLoading }) {
   const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1);
   const [fileData, setFileData] = useState([]);
   const [targetColumn, setTargetColumn] = useState('');
   const [progress, setProgress] = useState(0);
@@ -40,6 +41,7 @@ export default function ImportFile({ setAnalyticsData, setIsLoading }) {
       const buffer = event.target.result;
       const workbook = XLSX.read(buffer, { type: 'array' });
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonRows = XLSX.utils.sheet_to_json(worksheet);
 
       if (jsonRows.length > 0) {
@@ -47,6 +49,7 @@ export default function ImportFile({ setAnalyticsData, setIsLoading }) {
         setTargetColumn(Object.keys(jsonRows[0])[0]); 
         setStep(2);
       } else {
+        alert("File Excel rỗng hoặc không đúng định dạng!");
         alert("File Excel rỗng hoặc không đúng định dạng!");
       }
     };
@@ -165,8 +168,10 @@ export default function ImportFile({ setAnalyticsData, setIsLoading }) {
               <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                 <div className="bg-indigo-600 h-full transition-all duration-300 ease-out" style={{ width: `${progress}%` }} />
               </div>
+              
               {progress === 100 && (
                 <button onClick={resetImport} className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium py-2 rounded-lg text-sm transition-colors">
+                  <CheckCircle className="w-4 h-4" /> Tải file Excel khác
                   <CheckCircle className="w-4 h-4" /> Tải file Excel khác
                 </button>
               )}

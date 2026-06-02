@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Cấu hình địa chỉ IP/URL của Backend.
-const BASE_URL = "https://caliber-hacker-driller.ngrok-free.dev";
+const BASE_URL = "http://localhost:8000";
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -23,7 +23,7 @@ export const analyzeSingleText = async (textContent) => {
     });
     console.log("Emotion response:", response.data);
     console.log("Aspect response:", res2.data);
-    
+
     return {
       emotion: response.data,
       aspect: res2.data,
