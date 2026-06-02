@@ -34,22 +34,3 @@ export const analyzeSingleText = async (textContent) => {
   }
 };
 
-// =========================================================================
-// HÀM 2: TRIỂN KHAI CÁCH 2 - Gửi mảng comment chữ sạch bóc từ Excel (JSON)
-// =========================================================================
-export const analyzeFileBatchJSON = async (arrayOfComments) => {
-  try {
-    // arrayOfComments truyền vào sẽ có dạng mảng chữ thuần túy: ["câu 1", "câu 2", "câu 3"...]
-    // MẸO: Bạn hãy check với ông bạn Backend xem ông ấy đặt tên đường link (endpoint) 
-    // nhận hàng loạt là gì nhé, ở đây tôi tạm để tên mẫu là "/batch-predict"
-    const response = await apiClient.post("/batch-predict", {
-      comments: arrayOfComments, // Đóng gói mảng chữ vào key "comments" gửi đi
-    });
-
-    console.log("Kết quả phân tích hàng loạt từ API:", response.data);
-    return response.data; // Trả về danh sách mảng kết quả đã được AI dán nhãn
-  } catch (error) {
-    console.error("Lỗi gọi API Phân tích hàng loạt (Cách 2):", error);
-    throw error;
-  }
-};
