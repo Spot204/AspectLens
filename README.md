@@ -1,16 +1,65 @@
-# React + Vite
+# AspectLens
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Hướng dẫn cài đặt và chạy dự án `AspectLens` sử dụng React + Vite.
 
-Currently, two official plugins are available:
+## Yêu cầu
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js phiên bản 18+ hoặc tương đương
+- npm (đi kèm Node.js)
 
-## React Compiler
+## Cài đặt
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Mở terminal tại thư mục gốc dự án:
+   ```bash
+   cd c:\Code\Website\aspectlens
+   ```
+2. Cài đặt các package:
+   ```bash
+   npm install
+   ```
 
-## Expanding the ESLint configuration
+## Chạy ứng dụng ở chế độ phát triển
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm run dev
+```
+
+Sau khi chạy lệnh này, Vite sẽ khởi động server phát triển. Mở trình duyệt và truy cập địa chỉ được hiển thị trong terminal, mặc định thường là:
+
+```bash
+http://localhost:5173
+```
+
+## Build sản phẩm để triển khai
+
+```bash
+npm run build
+```
+
+Lệnh này sẽ tạo thư mục `dist` chứa file đã được đóng gói sẵn, có thể dùng để deploy.
+
+## Xem lại build cục bộ
+
+```bash
+npm run preview
+```
+
+Lệnh này chạy server để xem trước build đã tạo.
+
+## Lint mã nguồn
+
+```bash
+npm run lint
+```
+
+## Thư mục chính
+
+- `src/` - mã nguồn React
+- `src/components/` - các component giao diện
+- `src/services/` - các dịch vụ API, xử lý dữ liệu
+- `public/` - tài nguyên tĩnh
+
+## Ghi chú
+
+- Dự án dùng `Vite`, `React`, `Tailwind CSS`, `axios`, `recharts`, `papaparse`, và `xlsx`.
+- Nếu gặp lỗi sau khi cài đặt, hãy thử xóa thư mục `node_modules` và file `package-lock.json`, sau đó chạy lại `npm install`.
